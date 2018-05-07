@@ -36,7 +36,7 @@ def select(dbName, sql):
     except Exception as e:
         print("Error: %s fail to open, reason: %s" % (dbName, e.__str__()))
 
-    return None
+    return []
 
 
 def __get_db(dbName):

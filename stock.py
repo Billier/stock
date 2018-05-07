@@ -1,6 +1,8 @@
-import requests
-import mysql_util
 import datetime
+
+import requests
+
+import mysql_util
 from page import Page
 
 APP_KEY = "b690dbd794c308aeafbfd86f247b6b73"

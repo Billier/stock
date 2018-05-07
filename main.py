@@ -1,6 +1,7 @@
 from stock import Stock
 import datetime
 import time
+import mysql_util
 import mail
 
 
@@ -11,8 +12,28 @@ def sleep(h, m, s):
 def work():
     s = Stock()
     s.set_error_func(lambda e: print(e))
-    s.set_complete_func(lambda: mail.send("執行完畢"))
+    s.set_complete_func(after_work)
     s.request_stocks()
+
+
+def after_work():
+    recommend()
+    print("執行完畢")
+
+
+def recommend():
+    results = []
+    results.extend(mysql_util.select())
+    results.extend(mysql_util.select())
+
+    if len(results) == 0:
+        content = "暂无推荐"
+    else:
+        content = "今日（%s）推荐：\n" % datetime.datetime.now().strftime("%Y-%m-%d")
+        for r in results:
+            content += "%s  %s \n" % (r.code, r.name)
+
+    mail.send(content)
 
 
 if __name__ == '__main__':
@@ -25,7 +46,8 @@ if __name__ == '__main__':
             cur_date = now.strftime("%Y-%m-%d")
             done = False
 
-        if not done:
+        if not done and now.hour > 15:
+            print("开始执行脚本")
             done = True
             work()
 
