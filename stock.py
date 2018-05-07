@@ -2,13 +2,9 @@ import datetime
 
 import requests
 
+import constant
 import mysql_util
 from page import Page
-
-APP_KEY = "b690dbd794c308aeafbfd86f247b6b73"
-DB_NAME = "stock"
-SH_URL = "http://web.juhe.cn:8080/finance/stock/shall"
-SZ_URL = "http://web.juhe.cn:8080/finance/stock/szall"
 
 
 class Stock:
@@ -28,13 +24,13 @@ class Stock:
     def request_stocks(self):
         self.__remove_old_data()
         self.__request_count = 2
-        self.__get_stocks(SH_URL, Page())
-        self.__get_stocks(SZ_URL, Page())
+        self.__get_stocks(constant.SH_URL, Page())
+        self.__get_stocks(constant.SZ_URL, Page())
 
     def __remove_old_data(self):
-        mysql_util.execute(DB_NAME, "DELETE FROM stock")
+        mysql_util.execute(constant.DB_NAME, "DELETE FROM stock")
         date = datetime.datetime.now().strftime("%Y-%m-%d")
-        mysql_util.execute(DB_NAME, "DELETE FROM daily WHERE date='%s'" % date)
+        mysql_util.execute(constant.DB_NAME, "DELETE FROM daily WHERE date='%s'" % date)
 
     def __get_stocks(self, url, page):
         if page.get_total_page() > 0 and not page.has_more_page():
@@ -45,7 +41,7 @@ class Stock:
             return
 
         params = {
-            "key": APP_KEY,
+            "key": constant.APP_KEY,
             "stock": "a",
             "page": page.get_cur_page(),
             "type": 4
@@ -107,7 +103,7 @@ class Stock:
 
         if can_save:
             sql = sql[:-1]
-            if mysql_util.execute(DB_NAME, sql):
+            if mysql_util.execute(constant.DB_NAME, sql):
                 return True
 
         return False
@@ -139,7 +135,7 @@ class Stock:
 
         if can_save:
             sql = sql[:-1]
-            if mysql_util.execute(DB_NAME, sql):
+            if mysql_util.execute(constant.DB_NAME, sql):
                 return True
 
         return False
