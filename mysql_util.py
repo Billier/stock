@@ -9,16 +9,15 @@ def execute(dbName, sql):
         try:
             cursor.execute(sql)
             db.commit()
-            return True
         except Exception as e:
             db.rollback()
             print("Error: unable to execute sql, reason: %s" % e.__str__())
+            raise e
         finally:
             db.close()
     except Exception as e:
         print("Error: %s fail to open, reason: %s" % (dbName, e.__str__()))
-
-    return False
+        raise e
 
 
 def select(dbName, sql):
@@ -31,10 +30,12 @@ def select(dbName, sql):
             return cursor.fetchall()
         except Exception as e:
             print("Error: unable to fetch data, reason: %s" % e.__str__())
+            raise e
         finally:
             db.close()
     except Exception as e:
         print("Error: %s fail to open, reason: %s" % (dbName, e.__str__()))
+        raise e
 
     return []
 

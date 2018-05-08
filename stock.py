@@ -22,15 +22,23 @@ class Stock:
             self.__complete_func = func
 
     def request_stocks(self):
-        self.__remove_old_data()
+        if not self.__remove_old_data():
+            return
+
         self.__request_count = 2
         self.__get_stocks(constant.SH_URL, Page())
         self.__get_stocks(constant.SZ_URL, Page())
 
     def __remove_old_data(self):
-        mysql_util.execute(constant.DB_NAME, "DELETE FROM stock")
         date = datetime.datetime.now().strftime("%Y-%m-%d")
-        mysql_util.execute(constant.DB_NAME, "DELETE FROM daily WHERE date='%s'" % date)
+        try:
+            mysql_util.execute(constant.DB_NAME, "DELETE FROM stock")
+            mysql_util.execute(constant.DB_NAME, "DELETE FROM daily WHERE date='%s'" % date)
+            return True
+        except Exception as e:
+            if self.__error_func is not None:
+                self.__error_func(e)
+            return False
 
     def __get_stocks(self, url, page):
         if page.get_total_page() > 0 and not page.has_more_page():
@@ -60,13 +68,11 @@ class Stock:
                 page.next_page()
 
                 if not self.__save_stocks(data["data"]):
-                    if self.__error_func is not None:
-                        self.__error_func("save data error")
                     return
 
                 self.__get_stocks(url, page)
             else:
-                error_str = "%s:%s" % (json["error_code"], json["reason"])
+                error_str = "%s: %s" % (json["error_code"], json["reason"])
                 print(error_str)
                 if self.__error_func is not None:
                     self.__error_func(error_str)
@@ -103,8 +109,13 @@ class Stock:
 
         if can_save:
             sql = sql[:-1]
-            if mysql_util.execute(constant.DB_NAME, sql):
+            try:
+                mysql_util.execute(constant.DB_NAME, sql)
                 return True
+            except Exception as e:
+                if self.__error_func is not None:
+                    self.__error_func(e)
+                return False
 
         return False
 
@@ -135,8 +146,13 @@ class Stock:
 
         if can_save:
             sql = sql[:-1]
-            if mysql_util.execute(constant.DB_NAME, sql):
+            try:
+                mysql_util.execute(constant.DB_NAME, sql)
                 return True
+            except Exception as e:
+                if self.__error_func is not None:
+                    self.__error_func(e)
+                return False
 
         return False
 
