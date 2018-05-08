@@ -64,7 +64,7 @@ if __name__ == '__main__':
         else:
             content = "今日（%s）推荐：\n" % datetime.datetime.now().strftime("%Y-%m-%d")
             for r in results:
-                content += "%s  %s \n" % (r.code, r.name)
+                content += "%s  %s \n" % (r[0], r[1])
 
         mail.send(content)
         logging.warning("发送邮件")
